@@ -9,6 +9,7 @@ def get_cv2_stream():
 
     if is_raspberry_pi:
         try:
+            print("running on rpi normally")
             pipeline = 'libcamerasrc ! videorate=30 ! videoconvert ! video/x-raw,format=BGR ! appsink'
             cap = cv2.VideoCapture(pipeline, cv2.CAP_GSTREAMER)
             return cap
