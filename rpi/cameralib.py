@@ -5,7 +5,7 @@ import time
 def get_cv2_stream():
     system_name = platform.system()
     release_info = platform.release()
-    is_raspberry_pi = (system_name == 'Linux' and ('raspbian' in release_info.lower() or 'raspberrypi' in release_info.lower()))
+    is_raspberry_pi = (system_name == 'Linux' and ('raspbian' in release_info.lower() or 'rpi' in release_info.lower()))
 
     if is_raspberry_pi:
         try:
