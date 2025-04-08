@@ -13,7 +13,7 @@ def get_cv2_stream():
             import numpy as np
 
             picam2 = Picamera2()
-            config = picam2.create_preview_configuration(main={"format": 'BGR8', "size": (640, 480)})
+            config = picam2.create_preview_configuration(main={"format": 'RGB888', "size": (640, 480)})
             picam2.configure(config)
             picam2.start()
             return 0, picam2
