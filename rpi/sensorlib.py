@@ -21,7 +21,7 @@ GPIO.setup(TRIG2, GPIO.OUT)
 GPIO.setup(ECHO2, GPIO.IN)
 
 # Setup GPIO pin for metal detector
-GPIO.setup(METAL_DETECTOR_PIN, GPIO.IN, pull_down_up=GPIO.PUD_DOWN) # Use pull-down resistor
+GPIO.setup(METAL_DETECTOR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # Use pull-down resistor
 
 def measure_distance(trig_pin, echo_pin):
     # Send a short HIGH pulse to the trigger pin
