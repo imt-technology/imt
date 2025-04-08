@@ -9,51 +9,35 @@ def get_cv2_stream():
 
     if is_raspberry_pi:
         try:
-            from picamera import PiCamera
-            from picamera.array import PiRGBArray
-            camera = PiCamera()
-            camera.resolution = (640, 480)  # Adjust resolution as needed
-            camera.framerate = 30             # Adjust framerate as needed
-            rawCapture = PiRGBArray(camera, size=(640, 480))
-            time.sleep(0.1)  # Allow camera to warm up
-
-            for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-                image = frame.array
-                yield image
-                rawCapture.truncate(0)
-            camera.close()
+            pipeline = 'libcamerasrc ! videorate=30 ! videoconvert ! video/x-raw,format=BGR ! appsink'
+            cap = cv2.VideoCapture(pipeline, cv2.CAP_GSTREAMER)
+            return cap
         except ImportError:
             print("Warning: picamera library not found. Falling back to default camera.")
             cap = cv2.VideoCapture(0)
-            if not cap.isOpened():
-                raise IOError("Cannot open default camera")
-            while True:
-                ret, frame = cap.read()
-                if not ret:
-                    break
-                yield frame
-            cap.release()
+            return cap
         except Exception as e:
             print(f"error using Raspberry Pi camera: {e}. Falling back to default camera.")
             cap = cv2.VideoCapture(0)
-            if not cap.isOpened():
-                raise IOError("cannot open default camera")
-            while True:
-                ret, frame = cap.read()
-                if not ret:
-                    break
-                yield frame
-            cap.release()
+            # if not cap.isOpened():
+            #     raise IOError("cannot open default camera")
+            # while True:
+            #     ret, frame = cap.read()
+            #     if not ret:
+            #         break
+            #     yield frame
+            # cap.release()
+            return cap
     else:
-        print("not running on a Raspberry Pi. Using default camera.")
+        print("not running on a Raspberry Pi. using default camera.")
         cap = cv2.VideoCapture(0)
-        if not cap.isOpened():
-            raise IOError("cannot open default camera")
-        while True:
-            ret, frame = cap.read()
-            if not ret:
-                break
-            yield frame
+        # if not cap.isOpened():
+        #     raise IOError("cannot open default camera")
+        # while True:
+        #     ret, frame = cap.read()
+        #     if not ret:
+        #         break
+        #     yield frame
         cap.release()
 
 if __name__ == "__main__":
