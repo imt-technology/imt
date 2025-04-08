@@ -38,7 +38,8 @@ def get_cv2_stream():
         #     if not ret:
         #         break
         #     yield frame
-        cap.release()
+        # cap.release()
+        return cap
 
 if __name__ == "__main__":
     print("this script is meant to be ran as a library.")
