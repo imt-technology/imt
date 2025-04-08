@@ -46,7 +46,10 @@ if __name__ == "__main__":
     if input("continue? [y/N] ") == "y":
         stream_generator = get_cv2_stream()
         try:
-            for frame in stream_generator:
+            while True:
+                ret, frame = stream_generator.read()
+                if not ret:
+                    break
                 cv2.imshow("Camera Stream", frame)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
