@@ -1,0 +1,10 @@
+[X] kamera
+[ ] senzori
+[X] komunikacija sa arduinom
+[ ] komunikacija sa serverom
+[ ] slanje podataka serveru
+[ ] kontrolisanje sa servera
+
+# ARDUINO
+[ ] kretanje gusenica
+[ ] kretanje ruke
