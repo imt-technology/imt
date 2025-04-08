@@ -5,6 +5,13 @@
 [ ] slanje podataka serveru
 [ ] kontrolisanje sa servera
 
+# SENSORI
+
+[X] 2 ultrazvucna
+[X] pnp metal detektor
+[ ] temperatura
+[ ] motori
+
 # ARDUINO
 [ ] kretanje gusenica
 [ ] kretanje ruke
