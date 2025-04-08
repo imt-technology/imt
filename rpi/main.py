@@ -4,7 +4,7 @@ import sensorlib
 from servercomm import *
 
 if __name__ == "__main__":
-    arduino = commlib.ArduinoComm()
+    # arduino = commlib.ArduinoComm()
     cam1 = cameralib.get_cv2_stream()
 
     async def main():
