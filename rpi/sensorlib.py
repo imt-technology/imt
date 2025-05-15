@@ -1,5 +1,22 @@
 import RPi.GPIO as GPIO
 import time
+import board
+import adafruit_dht
+
+dht_device = adafruit_dht.DHT11(board.D4)
+
+def read_dht11():
+    try:
+        temperature_c = dht_device.temperature
+        humidity = dht_device.humidity
+        if temperature_c is not None and humidity is not None:
+            return (temperature_c, humidity)
+        else:
+            print("Sensor reading failed (None values)")
+            return None
+    except RuntimeError as error:
+        print(f"Reading error: {error}")
+        return None
 
 # Define GPIO pins
 TRIG1 = 23
@@ -22,6 +39,9 @@ GPIO.setup(ECHO2, GPIO.IN)
 
 # Setup GPIO pin for metal detector
 GPIO.setup(METAL_DETECTOR_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) # Use pull-down resistor
+
+def metaldetector():
+    return GPIO.input(METAL_DETECTOR_PIN)
 
 def measure_distance(trig_pin, echo_pin):
     # Send a short HIGH pulse to the trigger pin

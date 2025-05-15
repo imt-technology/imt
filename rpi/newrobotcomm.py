@@ -10,17 +10,17 @@ import commlib
 from sensorlib import METAL_DETECTOR_PIN, read_dht11, measure_distance, metaldetector
 
 # 📌 API URL-ovi
-AUTH_URL = "http://192.168.100.8:5000/api/users/login"
-VIDEO_SIGNALR_URL = "ws://192.168.100.8:5000/videoHub"
-GPS_SIGNALR_URL = "ws://192.168.100.8:5000/gpsHub"
-SENSOR_SIGNALR_URL = "ws://192.168.100.8:5000/sensorHub"
-CONTROL_SIGNALR_URL = "ws://192.168.100.8:5000/controlHub"
+AUTH_URL = "https://heavily-precise-jawfish.ngrok-free.app/api/users/login"
+VIDEO_SIGNALR_URL = "wss://heavily-precise-jawfish.ngrok-free.app/videoHub"
+GPS_SIGNALR_URL = "wss://heavily-precise-jawfish.ngrok-free.app/gpsHub"
+SENSOR_SIGNALR_URL = "wss://heavily-precise-jawfish.ngrok-free.app/sensorHub"
+CONTROL_SIGNALR_URL = "wss://heavily-precise-jawfish.ngrok-free.app/controlHub"
 
 # 📌 Kamera na telefonu (IP Webcam app)
 VIDEO_STREAM_PHONE = "http://192.168.100.11:8080/video"
 
 # 📌 Kamera na laptopu (integrisana kamera)
-CAMERA_LAPTOP = 0
+CAMERA_LAPTOP = 0  
 
 # 📌 Početne vrednosti
 DEVICE_ID = "autic_01"
@@ -34,9 +34,9 @@ water_detected = 0
 mine_detected = 0
 
 # 📌 Postavke kvaliteta slike
-JPEG_QUALITY = 50
-FRAME_WIDTH = 320
-FRAME_HEIGHT = 240
+JPEG_QUALITY = 50  
+FRAME_WIDTH = 320   
+FRAME_HEIGHT = 240  
 
 commands = {
     "gusenice":
@@ -50,12 +50,7 @@ commands = {
 
 async def login():
     """ Autentifikacija i dobijanje JWT tokena """
-    payload = {"email": "...", "password": "..."}
-    with open("CREDENTIALS","r") as f:
-        raw = f.read()
-
-    payload["email"] = raw.split("\n")[0]
-    payload["password"] = raw.split("\n")[0]
+    payload = {"email": "admin@example.com", "password": "Admin123!"}
     try:
         response = requests.post(AUTH_URL, json=payload, verify=False)
         response.raise_for_status()
@@ -68,7 +63,8 @@ async def login():
 
 def connect_signalr(url, token):
     """ Povezivanje na SignalR sa JWT tokenom """
-    full_url = f"{url}?access_token={token}"
+    # // full_url = f"{url}?access_token={token}"
+    full_url = f"{url}"
     try:
         hub_connection = HubConnectionBuilder()\
             .with_url(full_url, options={"verify_ssl": False})\
@@ -89,8 +85,6 @@ def connect_signalr(url, token):
         return None
 
 async def send_gps_data(token):
-    ## TODO: DODATI GPS PODATKE
-
     """ Slanje GPS podataka preko SignalR-a. """
     client = connect_signalr(GPS_SIGNALR_URL, token)
 
@@ -118,12 +112,7 @@ async def send_gps_data(token):
         client.stop()
         print("🔴 SignalR GPS konekcija zatvorena!")
 
-async def send_sensor_data(token):
-    # global temperatura, vlaznost, radioaktivnost, radar_vrednost, radar_ugao
-    rawdht11 = read_dht11()
-    if rawdht11 != None: temperatura, vlaznost = rawdht11
-    else: temperatura, vlaznost = 0, 0
-
+async def send_sensor_data(token, arduino):
     """ Slanje podataka sa senzora: temperatura, vlaznost, radioaktivnost, radar, voda, metal detekcija. """
     client = connect_signalr(SENSOR_SIGNALR_URL, token)
 
@@ -134,10 +123,14 @@ async def send_sensor_data(token):
     try:
         while True:
             # 📡 Simulacija podataka sa senzora
+            # temperatura = round(20 + random.uniform(-2, 2), 2)  # 18-22°C
+            # vlaznost = round(50 + random.uniform(-5, 5), 2)  # 45-55%
+            # radioaktivnost = round(0.01 + random.uniform(-0.005, 0.005), 4)  # 0.005 - 0.015
+            # radar_vrednost = round(random.uniform(0, 100), 2)  # Radar očitavanje 0-100
+            # radar_ugao = random.randint(0, 360)  # Ugao 0-360°
 
             # 🛑 Simulacija detekcije metala i vode
-            voda = "0"
-            metal = metaldetector()
+            metal = "1" if "metal" in arduino.recvData() else "0"
 
             # trenutak = int(time.time()) % 180  # Broj sekundi u 3 minuta
 
@@ -146,16 +139,16 @@ async def send_sensor_data(token):
             # if 30 <= trenutak < 40:  # Metal se detektuje od 2:00 do 2:20
             #     metal = "1"
 
-            print(f"📡 Slanje podataka: Temp {temperatura}°C, Vlaznost {vlaznost}%, Rad 0 Sv/h, Radar [0, 0°], Voda {voda}, Metal {metal}")
+            # print(f"📡 Slanje podataka: Temp {temperatura}°C, Vlaznost {vlaznost}%, Rad {radioaktivnost} Sv/h, Radar [{radar_vrednost}, {radar_ugao}°], Voda {voda}, Metal {metal}")
 
             # 📤 Slanje podataka ka `sensorHub`
-            client.send("SendTemperatureHumidity", [temperatura, vlaznost])
-            client.send("SendSensorData", ["radioaktivnost", str(0)])
-            client.send("SendSensorData", ["voda", voda])
+            # client.send("SendTemperatureHumidity", [temperatura, vlaznost])
+            # client.send("SendSensorData", ["radioaktivnost", str(radioaktivnost)])
+            # client.send("SendSensorData", ["voda", voda])
             client.send("SendSensorData", ["metal", metal])
 
             # 📡 Slanje radarskih podataka (vrednost + ugao)
-            client.send("SendRadarData", [0, 0])
+            # client.send("SendRadarData", [radar_ugao, radar_vrednost])
 
             await asyncio.sleep(5)  # Pauza između slanja podataka
 
@@ -174,13 +167,16 @@ def process_frame(frame):
     frame_data = base64.b64encode(buffer).decode("utf-8")
     return frame_data
 
-async def stream_video(token, cap_pi, cap_laptop): # no questions
+async def stream_video(token, cap_pi):
     """ Slanje video frejmova sa telefona i laptopa preko SignalR-a """
     client = connect_signalr(VIDEO_SIGNALR_URL, token)
 
     if client is None:
         print("❌ Video SignalR konekcija nije uspostavljena.")
         return
+
+    cap_phone = cv2.VideoCapture(VIDEO_STREAM_PHONE, cv2.CAP_FFMPEG)
+    cap_laptop = cv2.VideoCapture(CAMERA_LAPTOP, cv2.CAP_DSHOW)
 
     try:
         while True:
@@ -201,8 +197,8 @@ async def stream_video(token, cap_pi, cap_laptop): # no questions
         print(f"❌ Greška u stream_video: {e}")
 
     finally:
-        # cap_phone.release()
-        # cap_laptop.release()
+        cap_phone.release()
+        cap_laptop.release()
         client.stop()
         print("🔴 SignalR video konekcija zatvorena!")
 
@@ -214,4 +210,13 @@ async def listen_for_commands(token, arduino : commlib.ArduinoComm):
         arduino.sendData(commands[tip][komanda])
         print(f"🕹️ Primljena komanda: ({tip} - {komanda})")
 
-    client.on("ReceiveControlCommand", print)
+    client.on("ReceiveControlCommand", handle_command)
+
+# async def main():
+#     token = "token"
+#     if token:
+#         await asyncio.gather(send_gps_data(token), send_sensor_data(token), stream_video(token), listen_for_commands(token))
+#     else:
+#         print("❌ Neuspešan login, prekidam program.")
+
+# asyncio.run(main())
