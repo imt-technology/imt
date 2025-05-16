@@ -139,7 +139,7 @@ async def send_sensor_data(token, arduino):
             # if 30 <= trenutak < 40:  # Metal se detektuje od 2:00 do 2:20
             #     metal = "1"
 
-            # print(f"📡 Slanje podataka: Temp {temperatura}°C, Vlaznost {vlaznost}%, Rad {radioaktivnost} Sv/h, Radar [{radar_vrednost}, {radar_ugao}°], Voda {voda}, Metal {metal}")
+            print(f"📡 Slanje podataka: Metal {metal}")
 
             # 📤 Slanje podataka ka `sensorHub`
             # client.send("SendTemperatureHumidity", [temperatura, vlaznost])
