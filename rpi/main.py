@@ -20,7 +20,7 @@ if __name__ == "__main__":
     async def main():
         token = await login()
         if token:
-            await asyncio.gather(send_gps_data(token), send_sensor_data(token, arduino), stream_video(cam1, cam1, token), listen_for_commands(token, arduino))
+            await asyncio.gather(send_gps_data(token), send_sensor_data(token, arduino), stream_video(cam1, token), listen_for_commands(token, arduino))
         else:
             print("❌ Neuspešan login, prekidam program.")
 
