@@ -123,28 +123,13 @@ async def send_sensor_data(token, arduino):
     try:
         while True:
             # 📡 Simulacija podataka sa senzora
-            # temperatura = round(20 + random.uniform(-2, 2), 2)  # 18-22°C
-            # vlaznost = round(50 + random.uniform(-5, 5), 2)  # 45-55%
-            # radioaktivnost = round(0.01 + random.uniform(-0.005, 0.005), 4)  # 0.005 - 0.015
-            # radar_vrednost = round(random.uniform(0, 100), 2)  # Radar očitavanje 0-100
-            # radar_ugao = random.randint(0, 360)  # Ugao 0-360°
 
             # 🛑 Simulacija detekcije metala i vode
             metal = "1" if "metal" in arduino.recvData() else "0"
 
-            # trenutak = int(time.time()) % 180  # Broj sekundi u 3 minuta
-
-            # if 20 <= trenutak < 30:  # Voda se detektuje od 1:00 do 1:10
-            #     voda = "1"
-            # if 30 <= trenutak < 40:  # Metal se detektuje od 2:00 do 2:20
-            #     metal = "1"
-
             print(f"📡 Slanje podataka: Metal {metal}")
 
             # 📤 Slanje podataka ka `sensorHub`
-            # client.send("SendTemperatureHumidity", [temperatura, vlaznost])
-            # client.send("SendSensorData", ["radioaktivnost", str(radioaktivnost)])
-            # client.send("SendSensorData", ["voda", voda])
             client.send("SendSensorData", ["metal", metal])
 
             # 📡 Slanje radarskih podataka (vrednost + ugao)
@@ -187,12 +172,6 @@ async def stream_video(token, cap_pi):
                 client.send("SendVideoFrame", ["phone", frame_data])
                 print("saljem sliku, feeling goood")
 
-            # ret_laptop, frame_laptop = cap_laptop.read() if cap_laptop.isOpened() else (False, None)
-            # if ret_laptop:
-                # frame_data = process_frame(frame_laptop)
-                # client.send("SendVideoFrame", ["laptop", frame_data])
-                # print("📡 Poslat video frejm sa laptop kamere!")
-
             await asyncio.sleep(0.1)
 
     except Exception as e:
@@ -213,6 +192,8 @@ async def listen_for_commands(token, arduino : commlib.ArduinoComm):
         print(f"🕹️ Primljena komanda: ({tip} - {komanda})")
 
     client.on("ReceiveControlCommand", handle_command)
+
+# referenca main funkcije, NE BRISATI
 
 # async def main():
 #     token = "token"
