@@ -170,6 +170,7 @@ def process_frame(frame):
 async def stream_video(token, cap_pi):
     """ Slanje video frejmova sa telefona i laptopa preko SignalR-a """
     client = connect_signalr(VIDEO_SIGNALR_URL, token)
+    print("Video SignalR konekcija uspostavljena")
 
     if client is None:
         print("❌ Video SignalR konekcija nije uspostavljena.")
@@ -184,6 +185,7 @@ async def stream_video(token, cap_pi):
             if cap_pi:
                 frame_data = process_frame(frame_phone)
                 client.send("SendVideoFrame", ["phone", frame_data])
+                print("saljem sliku, feeling goood")
 
             # ret_laptop, frame_laptop = cap_laptop.read() if cap_laptop.isOpened() else (False, None)
             # if ret_laptop:
